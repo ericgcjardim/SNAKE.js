@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=0.7,maximum-scale=0.7,user-scalable=0">
+    <style>
+        body {
+            overscroll-behavior: contain; 
+
+        }
+        html, body {
+            overflow: hidden;
+        }
+        #ponto
+        {
+            font-size:x-large;
+            font-family:Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+        }
+
+
+    </style>
+    <title>Jogo da cobrinha</title>
+</head>
+<body>
+    <canvas id="telinha" height="400" width="600"></canvas> 
+    <div id="ponto"></div>
+    
+    
+
+
+    
+    
+    <!-- canvas is used to draw graphics in js-->
+    <script>
+
+        
+
+        const tabuleiro = document.getElementById("telinha") //pegamos o noss canvas e definimos como nosso tabuleiro no js
+        const tabuleiro_contexto = tabuleiro.getContext('2d')// definindo o contexto do tabuleiro "jogo em duas dimensoes"
+
+        // desenhar retangulo utilizando fillrect()
+        function desenharTabuleiro(){
+            tabuleiro_contexto.fillStyle = '#000000';//cor do retangulo
+            tabuleiro_contexto.strokeStyle = 'blue';//cor do retangulo
+            tabuleiro_contexto.fillRect(0,0,400,400);//preenche retangulo
+
+
+
+            //parte de escolher cores
+            tabuleiro_contexto.fillRect(400,0,100,400);
+            tabuleiro_contexto.lineWidth = 5;
+            tabuleiro_contexto.strokeRect(400,0,100,400);
+
+            // as cores em si 
+            //
+            tabuleiro_contexto.fillStyle = 'lightgreen';
+            tabuleiro_contexto.fillRect(425,25,50,50);
+            tabuleiro_contexto.fillStyle = 'lightblue';
+            tabuleiro_contexto.fillRect(425,25,25,50);
+            //vermelho e laranja
+            tabuleiro_contexto.fillStyle = 'red';
+            tabuleiro_contexto.fillRect(425,125,50,50);
+            tabuleiro_contexto.fillStyle = 'orange';
+            tabuleiro_contexto.fillRect(425,125,25,50);
+            //
+            tabuleiro_contexto.fillStyle = 'purple';
+            tabuleiro_contexto.fillRect(425,230,50,50);
+            tabuleiro_contexto.fillStyle = 'yellow';
+            tabuleiro_contexto.fillRect(425,230,25,50);
+            //
+            tabuleiro_contexto.fillStyle = 'pink';
+            tabuleiro_contexto.fillRect(425,330,50,50);
+            tabuleiro_contexto.fillStyle = 'violet';
+            tabuleiro_contexto.fillRect(425,330,25,50);
+
+
+             
+            
+
+        }
+
+
+        function posicaoMouse( event)
+        {
+            var mousex = event.clientX; 
+            var mousey = event.clientY;
+            if(mousex > 430 && mousex < 490 && mousey > 30 && mousey< 85)
+            {
+                cor_cobra = '#ADD8E6';
+                cor_comida = 'lightgreen';
+
+            }
+            if(mousex > 430 && mousex < 490 && mousey > 135 && mousey< 190)
+            {
+                cor_cobra = 'orange';
+                cor_comida = 'red';
+
+            }
+            if(mousex > 430 && mousex < 490 && mousey > 240 && mousey< 295)
+            {
+                cor_cobra = 'yellow';
+                cor_comida = 'purple';
+
+            }
+            if(mousex > 430 && mousex < 490 && mousey > 345 && mousey< 400)
+            {
+                cor_cobra = 'violet';
+                cor_comida = 'pink';
+
+            }
+            
+            
+            
+        }
+        
+
+        //criando a cobra na forma de um vetor de cordenadas
+        let cobra =
+        [
+        
+        {x:200,y:200}, 
+        {x:190,y:200}, 
+        {x:180,y:200}, 
+        {x:170,y:200}
+                    
+        ];
+
+
+        let dx = 10;// velocidade horizontal da cobra
+        let dy = 0;// velocidade vertical da cobra
+
+        var cor_cobra = '#ADD8E6';
+        var cor_comida = 'lightgreen';
+       
+
+        main();
+
+
+        
+
+        document.addEventListener("click", posicaoMouse);
+
+        document.addEventListener("touchstart", cobraTouchCima,false);
+        document.addEventListener("touchend", cobraTouchBaixo,false);
+
+        document.addEventListener("keydown", mudarDirecao);// event listener - quando um botao for apertado chama a funcao de mudar direcao
+        function main(){
+
+            setTimeout(function onTick() //NAO ENTENDI ISSO DIREITO 
+            {
+
+                if (gameOver()) {
+
+                    tabuleiro_contexto.fillStyle = 'red';//cor do retangulo
+                    tabuleiro_contexto.fillRect(0,0,400,400);//preenche retangulo
+                    location.reload(true);
+                    return;
+                    
+                }
+                
+                
+                desenharTabuleiro();
+                moverCobra();
+                desenharCobra();
+                DesenhaComida();
+               
+               
+                //chama o main denovo
+
+                main();
+
+
+            }, 50)
+
+        
+
+        }
+
+
+
+
+        //desenhando a cobra
+
+        function desenharCobra()
+        {
+            cobra.forEach(desenharParte);
+        }
+
+        function desenharParte(cobraParte)
+        {
+            tabuleiro_contexto.fillStyle = cor_cobra;
+            tabuleiro_contexto.fillRect(cobraParte.x, cobraParte.y ,10,10);
+        }
+
+
+        function moverCobra()
+        {
+            
+            const ponta = {x: cobra[0].x + dx, y:cobra[0].y + dy};// cria uma nova ponta pra cobra, adicionando dx(10) a sua cordenada horizontal e o mesmo com a vetical
+            cobra.unshift(ponta);// adiciona elementos ao inicio de um vetor; reescreve o vetor original
+            cobra.pop();// pop remove o ultimo elemento de um vetor e retorna ele.
+
+            
+        }
+
+        var deltaX;
+        var deltaY;
+            
+        var clientX;
+        var clientY;
+
+
+        function cobraTouchCima(event)
+        {
+            clientX = event.touches[0].clientX;
+            clientY = event.touches[0].clientY;
+        }
+
+
+        function cobraTouchBaixo(event)
+        {
+            deltaX = event.changedTouches[0].clientX - clientX;
+            deltaY = event.changedTouches[0].clientY - clientY;
+            
+            const subindo = dy === -10; // confirma se a cobra esta subindo se o valor de (velocidade vertical) for estritamente igual a -10
+            const descendo = dy === 10;// mesma coisa pro resto
+            const indoDireita = dx === 10;
+            const indoEsquerda = dx === -10;
+
+            //modulo dos deltas
+            var moduloX;
+            var moduloY;
+
+            if( deltaX < 0 )
+            {
+                moduloX = deltaX*-1;
+            }
+            else{
+                moduloX = deltaX;
+            }
+
+            if( deltaY < 0 )
+            {
+                moduloY = deltaY*-1;
+            }
+            else
+            {
+                moduloY = deltaY;
+            }
+
+
+
+            if ( deltaX > 0 && !indoEsquerda && moduloX>moduloY )
+            {
+                dx = 10;
+                dy = 0;
+            }
+            if (deltaX < 0 && !indoDireita && moduloX>moduloY )
+            {
+                dx = -10;
+                dy = 0;
+            }
+            if (deltaY > 0 && !subindo && moduloX<moduloY )
+            {
+                dx = 0;
+                dy = 10;
+            }
+            if (deltaY < 0 && !descendo && moduloX<moduloY)
+            {
+                dx = 0;
+                dy = -10;
+            }
+
+
+        }
+
+
+
+        function mudarDirecao(event) //funcao eh chamada por um addeventlistener, keydown(tecla pressionada)
+        {
+            const LEFT_KEY = 37;
+            const RIGHT_KEY = 39; //dando nome aos codigos das teclas no teclado; (setinhas)
+            const UP_KEY = 38;
+            const DOWN_KEY = 40;
+
+
+            const keyPressed = event.keyCode; // tecla pressionada = codigo da tecla (retorna o valor do codigo da tecla)
+            const subindo = dy === -10; // confirma se a cobra esta subindo se o valor de (velocidade vertical) for estritamente igual a -10
+            const descendo = dy === 10;// mesma coisa pro resto
+            const indoDireita = dx === 10;
+            const indoEsquerda = dx === -10;
+
+            if( keyPressed == UP_KEY && !descendo) // se a tecla SETINHA PRA CIMA FOR APERTADA(valor de keydown for igual valor da tecla pressionada) e a cobra nao estiver indo na direcao oposta
+            {
+                dx = 0;
+                dy = -10;
+            }
+            if( keyPressed == DOWN_KEY && !subindo) 
+            {
+                dx = 0;
+                dy = 10;
+            }
+            if( keyPressed == RIGHT_KEY && !indoEsquerda) 
+            {
+                dx = 10;
+                dy = 0;
+            }
+            if( keyPressed == LEFT_KEY && !indoDireita) 
+            {
+                dx = -10;
+                dy = 0;
+            }
+
+        }
+
+        function gameOver()
+        {
+
+            
+
+            for(i = 3; i<cobra.length; i++)
+            {
+                if (cobra[0].x == cobra[i].x && cobra[0].y == cobra[i].y )
+                {
+
+                    return true;
+
+                }
+
+            }
+
+            
+
+            if (cobra[0].x >= 390)
+            {
+
+                return true;
+
+            }
+            if (cobra[0].x <= 0)
+            {
+
+                return true;
+
+            }
+            if (cobra[0].y >= 390)
+            {
+
+                return true;
+
+            }
+            if (cobra[0].y <= 0)
+            {
+
+                return true;
+
+            }
+            
+
+        }
+
+
+        let comida = [{x:340, y:340}];
+
+
+        function randomComida()
+        {
+            var randomx =  Math.floor(Math.random() * 370)+20;
+            var randomy =  Math.floor(Math.random() * 370)+20;
+            var cx= randomx - (randomx%10);
+            var cy= randomy - (randomy%10);
+            
+            const novaComida = {x: cx , y: cy};
+            comida.unshift(novaComida);
+            comida.pop(); 
+        }
+
+
+        var cont = 0;
+
+
+
+        function DesenhaComida()
+        {
+            tabuleiro_contexto.fillStyle = cor_comida;
+            tabuleiro_contexto.fillRect(comida[0].x, comida[0].y ,10,10);
+            if (cobra[0].x == comida[0].x  &&  cobra[0].y == comida[0].y)
+            {
+                randomComida();
+                aumentaCobra();
+                cont++;
+                document.getElementById('ponto').innerHTML = cont;
+            }
+        }
+
+
+
+
+        function aumentaCobra()
+        {
+            let i=3;
+            const bunda = {x: cobra[i].x + dx, y:cobra[i].y + dy};
+            i++;
+            cobra.push(bunda);
+        }
+
+
+
+
+        
+        
+
+
+        
+
+    </script>
+
+
+</body>
+</html>
