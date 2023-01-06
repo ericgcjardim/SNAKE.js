@@ -81,7 +81,7 @@
         }
 
 
-        function posicaoMouse( event)
+        function posicaoMouse(event)
         {
             var mousex = event.clientX; 
             var mousey = event.clientY;
@@ -113,6 +113,37 @@
             
             
         }
+
+        function setup(corDaCobra){
+
+            if (corDaCobra == 1)
+            {
+                cor_cobra = '#ADD8E6';
+                cor_comida = 'lightgreen';
+            }
+            else 
+            {
+                if (corDaCobra == 2)
+                {
+                    cor_cobra = 'orange';
+                    cor_comida = 'red'; 
+                }else
+                {
+                    if(corDaCobra == 3)
+                    {
+                        cor_cobra = 'yellow';
+                        cor_comida = 'purple';
+
+                    }else{
+                        if(corDaCobra == 4){
+                            cor_cobra = 'violet';
+                            cor_comida = 'pink';                          
+                        }
+                    }
+                }
+            }
+
+        }
         
 
         //criando a cobra na forma de um vetor de cordenadas
@@ -132,6 +163,9 @@
 
         var cor_cobra = '#ADD8E6';
         var cor_comida = 'lightgreen';
+
+        var velocidade = 60;
+        
        
 
         main();
@@ -147,7 +181,7 @@
         document.addEventListener("keydown", mudarDirecao);// event listener - quando um botao for apertado chama a funcao de mudar direcao
         function main(){
 
-            setTimeout(function onTick() //NAO ENTENDI ISSO DIREITO 
+            setTimeout(function onTick() //chama o jogo 
             {
 
                 if (gameOver()) {
@@ -158,7 +192,15 @@
                     return;
                     
                 }
-                
+                if (cont%10 == 0 && cont != 0){
+
+                  
+                    let corMuda = Math.floor(Math.random() * 4) + 1;
+                    setup(corMuda);
+
+
+
+                }
                 
                 desenharTabuleiro();
                 moverCobra();
@@ -171,7 +213,7 @@
                 main();
 
 
-            }, 50)
+            }, velocidade)
 
         
 
@@ -331,7 +373,6 @@
             }
 
             
-
             if (cobra[0].x >= 390)
             {
 
@@ -389,6 +430,7 @@
             {
                 randomComida();
                 aumentaCobra();
+                velocidade = velocidade*0.98;
                 cont++;
                 document.getElementById('ponto').innerHTML = cont;
             }
