@@ -12,7 +12,3 @@ O jogo pode ser jogado por meio das setas do teclado ou com touch screen, arrast
 - HTML5
 - CSS3
 - JavaScript (Vanilla)
-
-## :rocket: Como Executar o Projeto
-
-1. Clone este repositório para sua máquina local usando:
